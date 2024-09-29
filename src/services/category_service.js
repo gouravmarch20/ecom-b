@@ -3,8 +3,23 @@ const NotFoundError = require("../errors/not_found_error");
 
 class CategoryService {
 
-    constructor(respository) {
-        this.respository = respository
+    constructor(respository, productRepository) {
+        this.respository = respository;
+        this.productRepository = productRepository;
+    }
+
+    async getProductsForCategory(categoryId) {
+        try {
+            await this.getCategory(categoryId);
+            const response = await this.productRepository.getProductsForCategory(categoryId);
+            return response;
+        } catch(error) {
+            if(error.name === "NotFoundError") {
+                throw error;
+            }
+            console.log("CategorySerice: ",error);
+            throw new InternalServerError();
+        }
     }
 
     async createCategory(category) {
@@ -51,8 +66,16 @@ class CategoryService {
     async destroyCategory(categoryId) {
         try {
             const response = await this.respository.destroyCategory(categoryId);
+            if(!response) {
+                // we were not able to find anything
+                console.log("CategoryService: ", categoryId, "not found");
+                throw new NotFoundError("Category", "id", categoryId);
+            }
             return response;
         } catch(error) {
+            if(error.name === "NotFoundError") {
+                throw error;
+            }
             console.log("CategorySerice: ",error);
             throw new InternalServerError();
         }
