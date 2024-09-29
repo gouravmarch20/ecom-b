@@ -1,0 +1,5 @@
+PORT=3001
+DB_HOST=localhost
+DB_USER=root
+DB_NAME=shopcart_db
+DB_PASS=next15@code
